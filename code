@@ -1,1 +1,621 @@
+//  Created by Hassan Saqib on 04/01/2023.
+//  github account : hassansaqib1
+//  the program is written such that it contains a inner heap that deels with priority hours minutes  seconds 
+//  then there is an outter heap that deels with day month year 
+//  the basic structure that are invoved in the program are class and arrays of that classes 
 
+
+#include <assert.h>
+#include<iostream>
+using namespace std;
+
+//---------------------------------------------------------
+//this is the inner heap 
+class messagebuffer
+{
+private:
+        // Can be node class
+    struct Node
+    {
+        int key;
+        int hour;
+        int minutes;
+        int second;
+        string message;
+    };
+    Node *arr;
+    int capacity; // Size of Heap
+    int totalItems; //number of inteams that are stored in this heap
+    void doubleCapacity() // A fuction to  Increase the size as memory allocation is mostly dynamic 
+    {
+        if (this->arr==NULL)
+        {
+            this->arr = new Node[1];
+            this->capacity = 1;
+            return;
+        }
+        int newCapacity = capacity*2;
+        Node *newArr = new Node[newCapacity];
+        for (int i = 0; i < this->totalItems; i++)
+        {
+            newArr[i] = this->arr[i];
+        }
+        if (this->arr!=NULL)
+            delete [] this->arr;
+        this->capacity = newCapacity;
+        this->arr = newArr;
+    }
+// a shiftup fuction that cheaks and decides to shift the nodes
+    void shiftUp(int index)
+        {
+        if (index < 1)
+            return;
+        int parent = (index-1) / 2;
+        
+        //conditions that cheaks shiftup 
+        if (this->arr[index].key > this->arr[parent].key ){
+            
+        }
+        if (this->arr[index].key < this->arr[parent].key ){
+            swap(this->arr[index], this->arr[parent]);
+            shiftUp(parent);
+    
+        }
+        if (this->arr[index].key == this->arr[parent].key ){
+    
+            if (this->arr[index].hour < this->arr[parent].hour) {
+                if (this->arr[index].minutes < this->arr[parent].minutes) {
+                    if (this->arr[index].second < this->arr[parent].second) {
+                        swap(this->arr[index], this->arr[parent]);
+                        shiftUp(parent);
+                        }else{
+                        swap(this->arr[index], this->arr[parent]);
+                        shiftUp(parent);}
+                        }else{
+                        swap(this->arr[index], this->arr[parent]);
+                        shiftUp(parent);}
+                    }
+        }
+        return;
+    }
+
+    
+    
+    //fuction that checks whether to shiftdown the nodes or not
+    void shiftDown(int index)
+    {
+        int maxIndex = -1;
+        int lChildIndex = index * 2+1;
+        int rChildIndex = (index * 2) + 2;
+        //first we cheak the left child with parent 
+        //and conditions to cheak which is more prefered
+        if (lChildIndex < totalItems)
+        {
+            if (arr[index].key < arr[lChildIndex].key ){
+
+            }
+            if (arr[index].key > arr[lChildIndex].key ){
+                maxIndex=lChildIndex;
+        
+            }
+            if (arr[index].key == arr[lChildIndex].key ){
+        
+                if (arr[index].hour > arr[lChildIndex].hour) {
+                    if (arr[index].minutes > arr[lChildIndex].minutes) {
+                        if (arr[index].second > arr[lChildIndex].second) {
+                            maxIndex=lChildIndex;
+                            }else{
+                                maxIndex=lChildIndex; }
+                            }else{
+                                maxIndex=lChildIndex; }
+                        }
+            }
+
+
+        }
+        //then we cheak the right child with parent
+        //and coditions to cheak which is more prefered
+        if (rChildIndex < totalItems)
+        {
+            int newindex= (maxIndex == -1 ? index : maxIndex);
+            
+            if (arr[newindex].key < arr[rChildIndex].key ){
+
+            }
+            if (arr[newindex].key > arr[rChildIndex].key ){
+                maxIndex=rChildIndex;
+        
+            }
+            if (arr[newindex].key == arr[rChildIndex].key ){
+        
+                if (arr[newindex].hour > arr[rChildIndex].hour) {
+                    if (arr[newindex].minutes > arr[rChildIndex].minutes) {
+                        if (arr[newindex].second > arr[rChildIndex].second) {
+                            maxIndex=rChildIndex;
+                            }else{
+                                maxIndex=rChildIndex; }
+                            }else{
+                                maxIndex=rChildIndex; }
+                        }
+            }
+            
+            
+        }
+        if (maxIndex == -1)
+            return;
+        swap(arr[index], arr[maxIndex]);
+        shiftDown(maxIndex);
+    }
+public:
+    messagebuffer()
+    {
+        this->arr = NULL;
+        this->capacity = 0;
+        this->totalItems = 0;
+    }
+    messagebuffer(int _capacity)
+    {
+        assert(_capacity >= 1);
+        this->arr = new Node[_capacity];
+        this->capacity = _capacity;
+        this->totalItems = 0;
+    }
+    void insert(int key,int hour,int minutes,int seconds,string message)
+    {
+        if (this->totalItems == this->capacity)
+        {
+            doubleCapacity();
+        }
+        this->arr[totalItems].key = key;
+        this->arr[totalItems].hour = hour;
+        this->arr[totalItems].minutes = minutes;
+        this->arr[totalItems].second = seconds;
+        this->arr[totalItems].message = message;
+
+
+        shiftUp(totalItems);
+        this->totalItems++;
+    }
+    void getMax(int & key,int & hour,int & minutes,int & second,string & message)
+    {
+        assert(totalItems != 0);
+        key = this->arr[0].key;
+        hour =this->arr[0].hour;
+        minutes =this->arr[0].minutes;
+        second = this->arr[0].second;
+        message =this->arr[0].message;
+    }
+    void deleteMax()
+    {
+        assert(totalItems != 0);
+        swap(arr[0], arr[this->totalItems-1]);
+        totalItems--;
+        shiftDown(0);
+    }
+    bool isEmpty() const
+    {
+        return (totalItems == 0);
+    }
+    void deleteAll()
+    {
+        if (this->arr != NULL)
+        {
+            delete[]arr;
+            arr = NULL;
+            this->capacity = 0;
+            this->totalItems = 0;
+        }
+    }
+    ~messagebuffer()
+    {
+//        deleteAll();
+    }
+};
+//---------------------------------------
+//this is the outer heap
+class MaxHeap
+{
+private:
+        // Can be node class
+    struct Node
+    {
+        class messagebuffer mb1;
+
+
+        int day;
+        int month;
+        int year;
+        
+        
+        
+//        class messagebuffer b1;
+    };
+    Node *arr;
+    int capacity; // Size of Heap
+    int totalItems; //
+    void doubleCapacity() // Increase the size
+    {
+        if (this->arr==NULL)
+        {
+            this->arr = new Node[1];
+            this->capacity = 1;
+            return;
+        }
+        int newCapacity = capacity*2;
+        Node *newArr = new Node[newCapacity];
+        for (int i = 0; i < this->totalItems; i++)
+        {
+            newArr[i] = this->arr[i];
+        }
+        if (this->arr!=NULL){
+
+            delete [] this->arr;}
+        
+        this->capacity = newCapacity;
+            this->arr = newArr;
+    }
+    void shiftUp(int index) //shiftup fuction for earlier date
+    {
+        if (index < 1)
+            return;
+        int parent = (index-1) / 2;
+
+
+        if (this->arr[index].year < this->arr[parent].year) {
+
+            if (this->arr[index].month < this->arr[parent].month) {
+
+                if (this->arr[index].day < this->arr[parent].day) {
+
+                        swap(this->arr[index], this->arr[parent]);
+                        shiftUp(parent);
+
+                }else{
+                    swap(this->arr[index], this->arr[parent]);
+                    shiftUp(parent);}
+            }else{
+                swap(this->arr[index], this->arr[parent]);
+                shiftUp(parent);}
+        }
+
+            return;
+    }
+    void shiftDown(int index) //shiftdown fuction for earlier date
+    {
+        int maxIndex = -1;
+        int lChildIndex = index * 2+1;
+        int rChildIndex = (index * 2) + 2;
+        if (lChildIndex < totalItems)
+        {
+
+            if (arr[index].year > arr[lChildIndex].year) {
+
+                if (arr[index].month > arr[lChildIndex].month) {
+                    if (arr[index].day > arr[lChildIndex].day) {
+                            maxIndex = lChildIndex;
+
+                    }else{maxIndex = lChildIndex;}
+
+                }else{maxIndex = lChildIndex;}
+            }
+
+        }
+        if (rChildIndex < totalItems)
+        {
+            int newindex= (maxIndex == -1 ? index : maxIndex);
+
+
+            if (arr[newindex].year > arr[rChildIndex].year) {
+                if (arr[newindex].month > arr[rChildIndex].month) {
+                    if (arr[newindex].day > arr[rChildIndex].day) {
+                    maxIndex = rChildIndex;
+
+                    }else{maxIndex = rChildIndex;}
+                }else{maxIndex = rChildIndex;}
+            }
+
+        }
+        if (maxIndex == -1)
+            return;
+        swap(arr[index], arr[maxIndex]);
+        shiftDown(maxIndex);
+    }
+public:
+    MaxHeap()
+    {
+        this->arr = NULL;
+        this->capacity = 0;
+        this->totalItems = 0;
+    }
+    MaxHeap(int _capacity)
+    {
+        assert(_capacity >= 1);
+        this->arr = new Node[_capacity];
+        this->capacity = _capacity;
+        this->totalItems = 0;
+    }
+
+    bool cheak_y_m_s(int year,int month,int day){
+
+
+        for (int i=0; i<totalItems; i++) {
+            if (arr[i].year==year && arr[i].month==month && arr[i].day==day) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void insertinmessagebuffer(int year,int month,int day,int priority,int hour,int minutes,int second,string message){
+
+        for (int i=0; i<totalItems; i++) {
+            if (arr[i].year==year && arr[i].month==month && arr[i].day==day) {
+
+                arr[i].mb1.insert(priority, hour, minutes, second, message);
+            }
+        }
+
+    }
+
+
+
+    void insert(int year,int month,int day,int priority,int hour,int minutes,int second,string message)
+    {
+        if (cheak_y_m_s(year, month, day)==false) {
+
+
+
+            if (this->totalItems == this->capacity)
+            {
+                doubleCapacity();
+            }
+
+            this->arr[totalItems].year = year;
+            this->arr[totalItems].month = month;
+            this->arr[totalItems].day = day;
+            this->arr[totalItems].mb1.insert(priority, hour, minutes, second, message);
+            shiftUp(totalItems);
+            this->totalItems++;
+
+        }else{insertinmessagebuffer(year, month, day, priority, hour, minutes, second, message);
+
+        }
+    }
+    void getMax(int & year,int & month,int & day,int & priority,int & hour,int & minutes,int & second,string & message)
+    {
+        if (this->arr[0].mb1.isEmpty()==true) {
+            deleteMax();
+        }
+        
+        assert(totalItems != 0);
+
+        year=this->arr[0].year;
+        month=this->arr[0].month;
+        day=this->arr[0].day;
+        this->arr[0].mb1.getMax(priority, hour, minutes, second, message);
+
+    }
+    void deleteMax()
+    {
+        assert(totalItems != 0);
+        swap(arr[0], arr[this->totalItems-1]);
+        totalItems--;
+        shiftDown(0);
+    }
+    bool isEmpty() const
+    {
+        return (totalItems == 0);
+    }
+
+    bool isEmptymessagebuffer()const
+    {
+        return (this->arr[0].mb1.isEmpty());
+    }
+
+    void deletemessage(){
+    
+        this->arr[0].mb1.deleteMax();
+
+    }
+
+    void deleteAll()
+    {
+        if (this->arr != NULL)
+        {
+            delete [] arr;
+            arr = NULL;
+            this->capacity = 0;
+            this->totalItems = 0;
+        }
+
+
+
+    }
+    ~MaxHeap()
+    {
+        deleteAll();
+        
+    }
+};
+
+
+
+
+
+
+
+
+
+
+int main()
+{
+
+
+//this is to test the inter heap which has priority hour minutes  seconds and message
+//    cout<<"testing--------------"<<endl;
+
+//    class messagebuffer b1;
+//    b1.insert(1, 1, 3, 6, "hi.there");
+//    b1.insert(3, 2, 8, 76, "hithere");
+//    b1.insert(0, 1, 9, 52, "hithere");
+//    b1.insert(6, 3, 8, 24, "hithere");
+//    b1.insert(32, 4, 2, 2, "there");
+//    b1.insert(3, 4, 3, 55, "hi");
+//    b1.insert(5, 2, 6, 57, "there");
+//    while (!b1.isEmpty())
+//    {
+//        int priority,hours,minutes,seconds;
+//        string message;
+//
+//        b1.getMax(priority, hours, minutes, seconds, message);
+//        cout<<"prority:"<<priority<<" hours:"<<hours<<" minutes:"<<minutes<<" seconds:"<<seconds<<" message:"<<message<<endl;
+//        b1.deleteMax();
+//    }
+
+//    cout<<"testingend--------------"<<endl;
+    
+    
+    //this is to test the outer heap and its interaction with inner heap 
+    // outer heap deals with earliest date
+    //    cout<<"testing--------------"<<endl;
+//    int year,month,day,priority,hour,minutes,second;
+//    string message;
+//
+//    class MaxHeap m;
+//    m.insert(10, 1, 1, 1, 3, 4, 2, "a");cout<<"1";
+//    m.insert(1, 1, 1, 2, 2, 3, 6, "b");cout<<"2";
+//    m.insert(1, 1, 1, 4, 6, 3, 4, "c");cout<<"3";
+//    m.insert(3, 2, 3, 5,7, 5, 6, "c");cout<<"4";
+//    m.insert(2, 2, 6, 2, 2, 4, 7, "d");cout<<"5";
+//
+//    while (!m.isEmpty()) {
+//
+//
+//
+//                    while (!m.isEmptymessagebuffer()) {
+//                        m.getMax(year, month, day, priority, hour, minutes, second, message);
+//                        cout<<"---------------------------------------"<<endl;
+//                        cout<<"Message details:"<<endl;
+//                        cout<<"date: "<<"day:"<<day<<" month:"<<month<<" year"<<year<<endl;
+//                        cout<<"time: "<<"hour"<<hour<<" minutes"<<minutes<<" seconds:"<<second<<endl;
+//                        cout<<"priority:"<<priority<<endl;
+//                        cout<<"Message:"<<message<<endl;
+//                        cout<<"---------------------------------------"<<endl;
+//                        m.deletemessage();
+//
+//                    }
+//                    m.deleteMax();
+//                }
+//    cout<<"testingend--------------"<<endl;
+    
+    
+    
+    //main menu of the in oder to enter message and read why various methods
+    
+    int condition;
+    int year,month,day,priority,hour,minutes,second;
+    string message;
+    MaxHeap heap;
+
+    while (condition!=5) {
+        year=month=day=priority=hour=minutes=second=0;
+        message="";
+
+
+        cout<<"-------------Message buffer-------------------"<<endl;
+        cout<<"  1.insert message"<<endl;
+        cout<<"  2.read 1 message"<<endl;
+        cout<<"  3.read for current day"<<endl;
+        cout<<"  4.read for all days"<<endl;
+        cout<<"  5.exit program"<<endl;
+        cout<<"------------------------------------------------"<<endl;
+        cout<<"Enter:";cin>>condition;
+
+        if (condition==1) {
+            //insertion
+            cout<<endl;
+            cout<<"---------------------------------------"<<endl;
+
+            cout<<"Enter year:";cin>>year;
+            cout<<"Enter month:";cin>>month;
+            cout<<"Enter day:";cin>>day;
+            cout<<"Enter priority:";cin>>priority;
+            cout<<"Enter hour:";cin>>hour;
+            cout<<"Enter minutes:";cin>>minutes;
+            cout<<"Enter second:";cin>>second;
+            cout<<"Enter message:";cin>>message;
+            cout<<"---------------------------------------"<<endl;
+            heap.insert(year, month, day, priority, hour, minutes, second, message);
+
+        }
+
+        else if (condition==2){
+            //read only one message and delete
+            heap.getMax(year, month, day, priority, hour, minutes, second, message);
+            cout<<"---------------------------------------"<<endl;
+            cout<<"Message details:"<<endl;
+            cout<<"date: "<<"day:"<<day<<" month:"<<month<<" year"<<year<<endl;
+            cout<<"time: "<<"hour"<<hour<<" minutes"<<minutes<<" seconds:"<<second<<endl;
+            cout<<"priority:"<<priority<<endl;
+
+            cout<<"Message:"<<message<<endl;
+            cout<<"---------------------------------------"<<endl;
+
+            heap.deletemessage();
+        }
+        else if (condition==3){
+            //read message for current day
+            while (!heap.isEmptymessagebuffer()) {
+                heap.getMax(year, month, day, priority, hour, minutes, second, message);
+                cout<<"---------------------------------------"<<endl;
+                cout<<"Message details:"<<endl;
+                cout<<"date: "<<"day:"<<day<<" month:"<<month<<" year"<<year<<endl;
+                cout<<"time: "<<"hour"<<hour<<" minutes"<<minutes<<" seconds:"<<second<<endl;
+                cout<<"priority:"<<priority<<endl;
+                cout<<"Message:"<<message<<endl;
+                cout<<"---------------------------------------"<<endl;
+                heap.deletemessage();
+
+            }
+            heap.deleteMax();
+
+        }
+        else if (condition==4){
+            //read message all input messages
+
+            
+            
+            if(heap.isEmpty()==true){
+                
+                cout<<"No message avaliable."<<endl;
+            }else{
+                while (!heap.isEmpty()) {
+                    
+                    
+                    
+                    while (!heap.isEmptymessagebuffer()) {
+                        heap.getMax(year, month, day, priority, hour, minutes, second, message);
+                        cout<<"---------------------------------------"<<endl;
+                        cout<<"Message details:"<<endl;
+                        cout<<"date: "<<"day:"<<day<<" month:"<<month<<" year"<<year<<endl;
+                        cout<<"time: "<<"hour"<<hour<<" minutes"<<minutes<<" seconds:"<<second<<endl;
+                        cout<<"priority:"<<priority<<endl;
+                        cout<<"Message:"<<message<<endl;
+                        cout<<"---------------------------------------"<<endl;
+                        heap.deletemessage();
+                        
+                    }
+                    heap.deleteMax();
+                }
+            }
+            
+        }
+        else if (condition==5){
+            //read only one message
+            heap.deleteAll();
+            cout<<endl<<"-------Program ended-------"<<endl;
+        }
+    }
+
+}
+//  Created by Hassan Saqib on 04/01/2023.
